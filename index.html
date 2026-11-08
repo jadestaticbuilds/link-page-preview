@@ -179,16 +179,19 @@ textarea.finput{resize:vertical;min-height:96px}
 #wfPrev,#wfNext{width:32px;height:40px;flex-shrink:0;background:none;border:none;color:var(--jade-hi);font-size:27px;cursor:pointer;line-height:1;padding:0}
 #wfOpen{flex-shrink:0;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--jade);
   text-decoration:none;border:1px solid var(--line);padding:7px 9px;border-radius:999px}
-.radiosign text{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-weight:800;font-size:62px;
-  fill:#ffc35c;text-anchor:middle;dominant-baseline:central}
-#skyL .radiosign text{font-size:54px}
+.radiosign text,.radiohalo text{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-weight:800;font-size:68px;
+  text-anchor:middle;dominant-baseline:central}
+.radiosign text{fill:#ffc35c}
+#skyP .radiosign text{fill:url(#p-radiograd)}
+#skyL .radiosign text{fill:url(#l-radiograd)}
+.radiohalo text{fill:#ff9d45;opacity:.85}
+#skyL .radiosign text,#skyL .radiohalo text{font-size:58px}
 .newtxt{font-family:system-ui,sans-serif;font-size:13px;font-weight:800;fill:#06231a;text-anchor:middle;dominant-baseline:central}
 .sigring{fill:none;stroke:#ff8a5e;stroke-width:3;opacity:0;transform-box:fill-box;transform-origin:center;
   animation:ringpulse 3.2s linear infinite}
 .sigring.r2{animation-delay:1.6s}
 @keyframes ringpulse{0%{transform:scale(.45);opacity:.75}70%{opacity:.18}100%{transform:scale(1.9);opacity:0}}
 body.wf-playing .sigring{animation-duration:1.5s}
-body.wf-playing .radiosign text{fill:#ffe2ae}
 .radiohot rect{fill:rgba(255,195,92,0);transition:fill .25s}
 .radiohot:hover rect{fill:rgba(255,195,92,.10)}
 .radiohot:focus-visible{outline:none}
@@ -208,6 +211,18 @@ body.wf-playing .radiosign text{fill:#ffe2ae}
     </linearGradient>
     <filter id="p-beamblur" x="-40%" y="-40%" width="180%" height="180%">
       <feGaussianBlur stdDeviation="16"/>
+    </filter>
+    <linearGradient id="p-radiograd" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff6df"/>
+      <stop offset=".55" stop-color="#ffd98c"/>
+      <stop offset="1" stop-color="#ffab4a"/>
+    </linearGradient>
+    <filter id="p-radioglow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="9" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="p-radiohalo" x="-90%" y="-90%" width="280%" height="280%">
+      <feGaussianBlur stdDeviation="17"/>
     </filter>
   </defs>
   <image class="skyimage" xlink:href="https://jadestaticbuilds.github.io/backdrop.webp" href="https://jadestaticbuilds.github.io/backdrop.webp" x="0" y="0" width="1184" height="2096"/>
@@ -265,7 +280,14 @@ body.wf-playing .radiosign text{fill:#ffe2ae}
     <circle class="beacon" cx="700" cy="545" r="7" fill="#ff6a5e" style="animation-duration:2.8s"/>
     <circle class="sigring" cx="700" cy="545" r="16"/>
     <circle class="sigring r2" cx="700" cy="545" r="16"/>
-    <g class="radiosign" filter="url(#p-winglow)" style="animation:neonflicker 8s linear infinite" aria-hidden="true">
+    <g class="radiohalo" filter="url(#p-radiohalo)" aria-hidden="true">
+      <text x="700" y="680">R</text>
+      <text x="700" y="748">A</text>
+      <text x="700" y="816">D</text>
+      <text x="700" y="884">I</text>
+      <text x="700" y="952">O</text>
+    </g>
+    <g class="radiosign" filter="url(#p-radioglow)" style="animation:neonflicker 8s linear infinite" aria-hidden="true">
       <text x="700" y="680">R</text>
       <text x="700" y="748">A</text>
       <text x="700" y="816">D</text>
@@ -315,6 +337,18 @@ body.wf-playing .radiosign text{fill:#ffe2ae}
     <filter id="l-beamblur" x="-40%" y="-40%" width="180%" height="180%">
       <feGaussianBlur stdDeviation="16"/>
     </filter>
+    <linearGradient id="l-radiograd" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff6df"/>
+      <stop offset=".55" stop-color="#ffd98c"/>
+      <stop offset="1" stop-color="#ffab4a"/>
+    </linearGradient>
+    <filter id="l-radioglow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="9" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="l-radiohalo" x="-90%" y="-90%" width="280%" height="280%">
+      <feGaussianBlur stdDeviation="17"/>
+    </filter>
   </defs>
   <image class="skyimage" xlink:href="https://jadestaticbuilds.github.io/backdrop-wide.webp" href="https://jadestaticbuilds.github.io/backdrop-wide.webp" x="0" y="0" width="2048" height="1152"/>
   <g transform="translate(1669,461)" aria-hidden="true">
@@ -328,7 +362,14 @@ body.wf-playing .radiosign text{fill:#ffe2ae}
     <circle class="beacon" cx="917" cy="348" r="6" fill="#ff6a5e" style="animation-duration:2.8s"/>
     <circle class="sigring" cx="917" cy="348" r="14"/>
     <circle class="sigring r2" cx="917" cy="348" r="14"/>
-    <g class="radiosign" filter="url(#l-winglow)" style="animation:neonflicker 9.5s linear infinite" aria-hidden="true">
+    <g class="radiohalo" filter="url(#l-radiohalo)" aria-hidden="true">
+      <text x="917" y="432">R</text>
+      <text x="917" y="490">A</text>
+      <text x="917" y="548">D</text>
+      <text x="917" y="606">I</text>
+      <text x="917" y="664">O</text>
+    </g>
+    <g class="radiosign" filter="url(#l-radioglow)" style="animation:neonflicker 9.5s linear infinite" aria-hidden="true">
       <text x="917" y="432">R</text>
       <text x="917" y="490">A</text>
       <text x="917" y="548">D</text>
