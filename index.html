@@ -164,7 +164,7 @@ textarea.finput{resize:vertical;min-height:96px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 /* --- World Frequency: RADIO tower + mini player --- */
-#wfbar{position:fixed;top:calc(64px + env(safe-area-inset-top,0));left:12px;right:12px;z-index:21;max-width:480px;
+#wfbar{position:fixed;bottom:max(24px, env(safe-area-inset-bottom, 0px));left:12px;right:12px;z-index:21;max-width:480px;
   display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:14px;
   background:rgba(6,24,17,.72);border:1px solid rgba(46,230,168,.35);
   -webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);
@@ -179,7 +179,6 @@ textarea.finput{resize:vertical;min-height:96px}
 #wfPrev,#wfNext{width:32px;height:40px;flex-shrink:0;background:none;border:none;color:var(--jade-hi);font-size:27px;cursor:pointer;line-height:1;padding:0}
 #wfOpen{flex-shrink:0;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--jade);
   text-decoration:none;border:1px solid var(--line);padding:7px 9px;border-radius:999px}
-.panel{top:calc(126px + env(safe-area-inset-top,0));max-height:calc(100vh - 158px);max-height:calc(100dvh - 158px)}
 .radiosign text{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-weight:800;font-size:62px;
   fill:#ffc35c;text-anchor:middle;dominant-baseline:central}
 #skyL .radiosign text{font-size:54px}
