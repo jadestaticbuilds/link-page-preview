@@ -1,0 +1,784 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#030d09">
+<title>Jade Static Builds</title>
+<meta name="description" content="A collaborative effort between mind and machine. Free browser apps, open source code, and socials.">
+<meta property="og:title" content="Jade Static Builds">
+<meta property="og:description" content="Free browser apps by Jade Static Builds, built with Muse.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://jadestaticbuilds.github.io/https://jadestaticbuilds.github.io/avatar.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://jadestaticbuilds.github.io/https://jadestaticbuilds.github.io/avatar.jpg">
+<link rel="icon" href="https://jadestaticbuilds.github.io/avatar.jpg">
+<link rel="manifest" href="https://jadestaticbuilds.github.io/manifest.json">
+<link rel="apple-touch-icon" href="https://jadestaticbuilds.github.io/ops/icon-192.png">
+<link rel="preload" as="image" href="https://jadestaticbuilds.github.io/backdrop.webp">
+<style>
+:root{
+  --bg0:#030d09;
+  --jade:#8fe0b3;
+  --jade-hi:#dcf5e6;
+  --jade-dim:rgba(143,224,179,.32);
+  --amber:#ffc35c;
+  --amber-hi:#ffe2ae;
+  --ink:#f0f8f3;
+  --mute:#9db8a8;
+  --line:rgba(143,224,179,.28);
+  --teal:#a8e6c1;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;color:var(--ink);
+  font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:var(--bg0);overflow:hidden;overscroll-behavior:none;
+  height:100vh;height:100dvh;position:relative;
+}
+/* blurred ambiance fills the frame around the poster stage */
+.ambient{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:url("https://jadestaticbuilds.github.io/backdrop.webp") center/cover no-repeat;
+  filter:blur(60px) brightness(.5);transform:scale(1.15)}
+/* the skyline: meet = whole poster always visible, hotspots track it exactly */
+svg.sky{position:fixed;inset:0;z-index:1;width:100%;height:100vh;height:100dvh;display:block}
+.hotspot{cursor:pointer}
+.hotspot rect{fill:rgba(255,195,92,0);transition:fill .25s}
+.hotspot:hover rect{fill:rgba(255,195,92,.10)}
+.hotspot:focus-visible{outline:none}
+.hotspot:focus-visible rect{stroke:var(--teal);stroke-width:3}
+@keyframes neonflicker{0%,100%{opacity:1}91%{opacity:1}92%{opacity:.55}93%{opacity:1}95%{opacity:.8}96%{opacity:1}}
+/* searchlight beam sweeping the clouds */
+.beamsweep{transform-box:fill-box;transform-origin:50% 100%;animation:beamsweep 16s ease-in-out infinite alternate}
+.beamsweep.l{animation-duration:19s;animation-delay:-6s}
+@keyframes beamsweep{from{transform:rotate(-22deg)}to{transform:rotate(22deg)}}
+.beamsrc{animation:beamsrc 3.2s ease-in-out infinite}
+@keyframes beamsrc{0%,100%{opacity:.9}50%{opacity:.45}}
+/* sky life: grid breathe, flickering windows (all inside the SVG scene) */
+.skyimage{animation:gridbreathe 11s ease-in-out infinite}
+@keyframes gridbreathe{0%,100%{filter:brightness(1)}50%{filter:brightness(.93)}}
+#skyL{display:none}
+.win{filter:url(#p-winglow);animation:winflick 7s linear infinite}
+#skyL .win{filter:url(#l-winglow)}
+@keyframes winflick{0%,100%{opacity:.85}46%{opacity:.85}48%{opacity:.1}50%{opacity:.85}76%{opacity:.85}78%{opacity:.2}80%{opacity:.85}}
+/* living-city preview additions (portrait scene) */
+.beamsweep.m2{animation:beamsweep2 24s ease-in-out infinite alternate}
+@keyframes beamsweep2{from{transform:rotate(-18deg)}to{transform:rotate(18deg)}}
+.signglow{animation:signglow 6s ease-in-out infinite}
+@keyframes signglow{0%,100%{opacity:.10}50%{opacity:.22}}
+.cattail{transform-box:fill-box;transform-origin:80% 90%;animation:cattail 24s ease-in-out infinite}
+@keyframes cattail{0%,46%,54%,100%{transform:rotate(0deg)}50%{transform:rotate(30deg)}}
+.beacon{animation:beaconblink 2.4s linear infinite}
+@keyframes beaconblink{0%,59%{opacity:.95}60%,100%{opacity:.08}}
+.winb{filter:url(#p-winglow);animation:winbreathe 9s ease-in-out infinite}
+@keyframes winbreathe{0%,100%{opacity:.35}50%{opacity:.9}}
+.letflick{opacity:0}
+#snowcv{position:fixed;inset:0;z-index:3;pointer-events:none}
+/* touch neon playground: no browser gestures on the sky (pinch-zoom steals two-finger touches);
+   panels keep vertical scroll */
+svg.sky{touch-action:none}
+.topbar{touch-action:manipulation}
+.panel{touch-action:pan-y}
+/* drifting mist across the viewport */
+.mist{position:fixed;pointer-events:none;opacity:.5;z-index:2;
+  background:radial-gradient(closest-side,rgba(143,224,179,.15),rgba(143,224,179,0))}
+.mist1{left:-12%;top:52%;width:70%;height:24%;animation:drift1 48s ease-in-out infinite alternate}
+.mist2{left:30%;top:70%;width:76%;height:22%;animation:drift2 64s ease-in-out infinite alternate}
+@keyframes drift1{from{transform:translateX(-12%)}to{transform:translateX(24%)}}
+@keyframes drift2{from{transform:translateX(20%)}to{transform:translateX(-18%)}}
+/* top bar */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:20;height:60px;
+  display:flex;align-items:center;gap:12px;padding:0 14px;
+  background:linear-gradient(180deg,rgba(3,13,9,.85),rgba(3,13,9,0));
+  padding-top:env(safe-area-inset-top,0)}
+.burger{width:46px;height:46px;flex-shrink:0;background:rgba(3,13,9,.55);border:1px solid var(--line);
+  border-radius:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.burger span{display:block;width:20px;height:2px;background:var(--jade-hi);border-radius:2px;
+  box-shadow:0 0 8px rgba(143,224,179,.7);transition:transform .25s,opacity .25s}
+.burger[aria-expanded="true"] span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.burger[aria-expanded="true"] span:nth-child(2){opacity:0}
+.burger[aria-expanded="true"] span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.burger:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.brandmark{display:flex;align-items:center;gap:10px;min-width:0;position:absolute;left:50%;
+  transform:translateX(-50%);-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
+.brandmark img{width:34px;height:34px;border-radius:50%;border:1px solid var(--jade);
+  box-shadow:0 0 14px rgba(143,224,179,.4);flex-shrink:0}
+.brandmark b{font-family:var(--mono);font-size:12px;letter-spacing:.3em;color:var(--jade-hi);font-weight:700;
+  text-shadow:0 0 12px rgba(143,224,179,.5);white-space:nowrap}
+/* dropdown panels */
+.panel{position:fixed;z-index:19;top:calc(60px + env(safe-area-inset-top,0));left:12px;right:12px;
+  max-width:480px;max-height:calc(100vh - 92px);max-height:calc(100dvh - 92px);overflow-y:auto;
+  -webkit-overflow-scrolling:touch;background:rgba(3,13,9,.88);
+  -webkit-backdrop-filter:blur(12px) saturate(1.2);backdrop-filter:blur(12px) saturate(1.2);
+  border:1px solid var(--line);border-radius:16px;padding:8px 8px calc(14px + env(safe-area-inset-bottom,0));
+  box-shadow:0 18px 50px rgba(0,0,0,.6),0 0 24px rgba(143,224,179,.08)}
+@media(min-width:520px){.panel{left:16px;right:auto;width:440px}}
+.panel[hidden]{display:none}
+.cathead{font-family:var(--mono);font-size:12px;letter-spacing:.28em;color:var(--jade);
+  text-transform:uppercase;margin:14px 10px 6px;display:flex;align-items:center;gap:10px;border-radius:8px}
+.cathead::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+.cathead.flash{animation:catflash 1.4s ease-in-out}
+@keyframes catflash{0%,100%{background:transparent}30%{background:rgba(46,230,168,.22)}}
+.approw{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink);
+  padding:9px 10px;border-radius:12px;min-height:60px}
+.approw:hover,.approw:focus-visible{background:rgba(143,224,179,.10);outline:none}
+.approw:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+.approw img{width:44px;height:44px;border-radius:11px;flex-shrink:0;
+  border:1px solid rgba(143,224,179,.4);box-shadow:0 0 10px rgba(143,224,179,.15)}
+.approw .nm{font-weight:700;font-size:16px;text-shadow:0 1px 8px rgba(3,13,9,.9)}
+.nmtx{display:flex;flex-direction:column;gap:2px;min-width:0}
+.ds{font-size:12.5px;color:var(--mute);font-weight:500;line-height:1.35}
+.catgroup[hidden]{display:none}
+span.new{display:inline-block;background:linear-gradient(180deg,var(--jade-hi),var(--jade));color:#06231a;
+  font-size:10px;font-weight:800;letter-spacing:.08em;padding:2px 8px;border-radius:999px;margin-left:8px;vertical-align:middle}
+.socrow{display:flex;align-items:center;gap:14px;color:var(--ink);text-decoration:none;
+  padding:13px 12px;border-radius:12px;font-weight:700;font-size:16px}
+.socrow:hover,.socrow:focus-visible{background:rgba(143,224,179,.10);outline:none}
+.socrow:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+.socrow .ic{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;flex-shrink:0;
+  border-radius:50%;border:1px solid var(--jade-dim);color:var(--jade-hi);background:rgba(3,13,9,.6)}
+.socrow svg{width:22px;height:22px}
+.socrow small{display:block;font-weight:500;color:var(--mute);font-size:13px}
+.paneltitle{font-family:var(--mono);font-size:12px;letter-spacing:.28em;color:var(--jade);
+  text-transform:uppercase;margin:12px 10px 4px}
+/* message form */
+.flabel{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--mute);margin:10px 10px 4px}
+.finput{display:block;width:calc(100% - 20px);margin:0 10px;box-sizing:border-box;
+  background:rgba(3,13,9,.7);border:1px solid var(--line);border-radius:8px;color:var(--ink);
+  font-size:16px;padding:12px;min-height:48px}
+.finput:focus{outline:2px solid var(--teal);outline-offset:1px;border-color:var(--teal)}
+textarea.finput{resize:vertical;min-height:96px}
+.fhoney{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+.fsend{display:block;width:calc(100% - 20px);margin:12px 10px 0;min-height:48px;cursor:pointer;
+  border:1px solid var(--jade);border-radius:10px;background:rgba(46,230,168,.12);
+  color:var(--jade-hi);font-weight:700;font-size:16px}
+.fsend:hover{background:rgba(46,230,168,.22)}
+.fsend:disabled{opacity:.5;cursor:wait}
+.fstatus{margin:8px 10px 0;font-size:13px;color:var(--mute);min-height:18px}
+.fstatus.ok{color:var(--jade-hi)}
+.fstatus.err{color:#ff7a7a}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* --- World Frequency: RADIO tower + mini player --- */
+#wfbar{position:fixed;top:calc(64px + env(safe-area-inset-top,0));left:12px;right:12px;z-index:21;max-width:480px;
+  display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:14px;
+  background:rgba(6,24,17,.72);border:1px solid rgba(46,230,168,.35);
+  -webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);
+  box-shadow:0 10px 30px rgba(0,0,0,.45)}
+@media(min-width:520px){#wfbar{left:16px;right:auto;width:440px}}
+#wfPlay{width:40px;height:40px;flex-shrink:0;border-radius:50%;border:1px solid var(--jade);
+  background:rgba(46,230,168,.16);color:var(--jade-hi);font-size:15px;cursor:pointer}
+#wfPlay:focus-visible,#wfPrev:focus-visible,#wfNext:focus-visible,#wfOpen:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.wfmeta{flex:1;min-width:0}
+#wfName{font-weight:700;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#wfTrack{font-size:12px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#wfPrev,#wfNext{width:32px;height:40px;flex-shrink:0;background:none;border:none;color:var(--jade-hi);font-size:27px;cursor:pointer;line-height:1;padding:0}
+#wfOpen{flex-shrink:0;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--jade);
+  text-decoration:none;border:1px solid var(--line);padding:7px 9px;border-radius:999px}
+.panel{top:calc(126px + env(safe-area-inset-top,0));max-height:calc(100vh - 158px);max-height:calc(100dvh - 158px)}
+.radiosign text{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-weight:800;font-size:62px;
+  fill:#ffc35c;text-anchor:middle;dominant-baseline:central}
+#skyL .radiosign text{font-size:54px}
+.newtxt{font-family:system-ui,sans-serif;font-size:13px;font-weight:800;fill:#06231a;text-anchor:middle;dominant-baseline:central}
+.sigring{fill:none;stroke:#ff8a5e;stroke-width:3;opacity:0;transform-box:fill-box;transform-origin:center;
+  animation:ringpulse 3.2s linear infinite}
+.sigring.r2{animation-delay:1.6s}
+@keyframes ringpulse{0%{transform:scale(.45);opacity:.75}70%{opacity:.18}100%{transform:scale(1.9);opacity:0}}
+body.wf-playing .sigring{animation-duration:1.5s}
+body.wf-playing .radiosign text{fill:#ffe2ae}
+.radiohot rect{fill:rgba(255,195,92,0);transition:fill .25s}
+.radiohot:hover rect{fill:rgba(255,195,92,.10)}
+.radiohot:focus-visible{outline:none}
+.radiohot:focus-visible rect{stroke:var(--teal);stroke-width:3}
+</style>
+</head>
+<body>
+<svg class="sky" id="skyP" viewBox="0 0 1184 2096" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Jade City skyline at night" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <filter id="p-winglow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <linearGradient id="p-beamgrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff6df" stop-opacity="0"/>
+      <stop offset="1" stop-color="#fff6df" stop-opacity=".8"/>
+    </linearGradient>
+    <filter id="p-beamblur" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="16"/>
+    </filter>
+  </defs>
+  <image class="skyimage" xlink:href="https://jadestaticbuilds.github.io/backdrop.webp" href="https://jadestaticbuilds.github.io/backdrop.webp" x="0" y="0" width="1184" height="2096"/>
+  <g transform="translate(983,1195)" aria-hidden="true">
+    <circle class="beamsrc" cx="0" cy="0" r="16" fill="#fff6df" filter="url(#p-beamblur)"/>
+    <g class="beamsweep">
+      <polygon points="0,0 -65,-950 65,-950" fill="url(#p-beamgrad)" filter="url(#p-beamblur)" opacity=".5"/>
+    </g>
+  </g>
+  <g transform="translate(625,1180)" aria-hidden="true">
+    <circle class="beamsrc" cx="0" cy="0" r="14" fill="#fff6df" filter="url(#p-beamblur)"/>
+    <g class="beamsweep m2">
+      <polygon points="0,0 -85,-1160 85,-1160" fill="url(#p-beamgrad)" filter="url(#p-beamblur)" opacity=".55"/>
+    </g>
+  </g>
+  <g aria-hidden="true">
+    <circle class="win" cx="500" cy="1150" r="7" fill="#ffe9b8" style="animation-duration:6.3s;animation-delay:-2.1s"/>
+    <circle class="win" cx="650" cy="1250" r="6" fill="#b8ffd9" style="animation-duration:7.8s;animation-delay:-4.4s"/>
+    <circle class="win" cx="850" cy="1050" r="6" fill="#ffe9b8" style="animation-duration:5.4s;animation-delay:-1.2s"/>
+    <circle class="win" cx="950" cy="1200" r="7" fill="#b8ffd9" style="animation-duration:8.6s;animation-delay:-6.0s"/>
+    <circle class="win" cx="750" cy="1350" r="5" fill="#ffe9b8" style="animation-duration:6.9s;animation-delay:-3.3s"/>
+    <circle class="win" cx="350" cy="1300" r="6" fill="#b8ffd9" style="animation-duration:7.2s;animation-delay:-5.1s"/>
+    <circle class="win" cx="450" cy="1450" r="5" fill="#ffe9b8" style="animation-duration:5.8s;animation-delay:-0.7s"/>
+    <circle class="win" cx="1050" cy="1300" r="6" fill="#b8ffd9" style="animation-duration:8.1s;animation-delay:-2.9s"/>
+    <circle class="win" cx="300" cy="1100" r="5" fill="#ffe9b8" style="animation-duration:6.6s;animation-delay:-4.0s"/>
+    <circle class="win" cx="700" cy="1500" r="6" fill="#b8ffd9" style="animation-duration:7.5s;animation-delay:-1.6s"/>
+    <circle class="win" cx="900" cy="1450" r="5" fill="#ffe9b8" style="animation-duration:5.2s;animation-delay:-3.8s"/>
+    <circle class="win" cx="550" cy="1600" r="6" fill="#b8ffd9" style="animation-duration:8.9s;animation-delay:-0.3s"/>
+  </g>
+  <g aria-hidden="true">
+    <ellipse class="signglow" cx="216" cy="900" rx="90" ry="210" fill="#ffc35c" filter="url(#p-beamblur)" style="animation-delay:-1.2s"/>
+    <ellipse class="signglow" cx="868" cy="1223" rx="80" ry="160" fill="#ffc35c" filter="url(#p-beamblur)" style="animation-delay:-3.1s"/>
+    <ellipse class="signglow" cx="861" cy="766" rx="80" ry="200" fill="#ffc35c" filter="url(#p-beamblur)" style="animation-delay:-4.4s"/>
+    <ellipse class="signglow" cx="837" cy="1752" rx="220" ry="70" fill="#ffc35c" filter="url(#p-beamblur)" style="animation-delay:-2.2s"/>
+    <circle class="beacon" cx="215" cy="595" r="7" fill="#ff6a5e" style="animation-duration:2.4s"/>
+    <circle class="beacon" cx="640" cy="875" r="7" fill="#ff6a5e" style="animation-duration:3s;animation-delay:-1.1s"/>
+    <circle class="beacon" cx="905" cy="475" r="7" fill="#ff6a5e" style="animation-duration:2s;animation-delay:-.6s"/>
+    <circle class="winb" cx="250" cy="1000" r="6" fill="#ffe9b8" style="animation-duration:8s;animation-delay:-2s"/>
+    <circle class="winb" cx="420" cy="1050" r="6" fill="#b8ffd9" style="animation-duration:11s;animation-delay:-5s"/>
+    <circle class="winb" cx="580" cy="1180" r="6" fill="#ffe9b8" style="animation-duration:9s;animation-delay:-1s"/>
+    <circle class="winb" cx="760" cy="1150" r="6" fill="#b8ffd9" style="animation-duration:12s;animation-delay:-7s"/>
+    <circle class="winb" cx="980" cy="1100" r="6" fill="#ffe9b8" style="animation-duration:7s;animation-delay:-3s"/>
+    <circle class="winb" cx="380" cy="1400" r="6" fill="#b8ffd9" style="animation-duration:10s;animation-delay:-4s"/>
+    <circle class="winb" cx="620" cy="1420" r="6" fill="#ffe9b8" style="animation-duration:8.5s;animation-delay:-6s"/>
+    <circle class="winb" cx="880" cy="1350" r="6" fill="#b8ffd9" style="animation-duration:11.5s;animation-delay:-2.5s"/>
+    <circle class="winb" cx="1050" cy="1450" r="6" fill="#ffe9b8" style="animation-duration:9.5s;animation-delay:-8s"/>
+    <circle class="winb" cx="300" cy="1500" r="6" fill="#b8ffd9" style="animation-duration:7.5s;animation-delay:-1.5s"/>
+    <circle class="winb" cx="700" cy="1650" r="6" fill="#ffe9b8" style="animation-duration:10.5s;animation-delay:-5.5s"/>
+    <circle class="winb" cx="950" cy="1600" r="6" fill="#b8ffd9" style="animation-duration:8.8s;animation-delay:-3.5s"/>
+    <image class="letflick" id="lf-games" xlink:href="https://jadestaticbuilds.github.io/masks/games.png" href="https://jadestaticbuilds.github.io/masks/games.png" x="172" y="721" width="89" height="359"/>
+    <image class="letflick" id="lf-tools" xlink:href="https://jadestaticbuilds.github.io/masks/tools.png" href="https://jadestaticbuilds.github.io/masks/tools.png" x="841" y="1092" width="54" height="262"/>
+    <image class="letflick" id="lf-socials" xlink:href="https://jadestaticbuilds.github.io/masks/socials.png" href="https://jadestaticbuilds.github.io/masks/socials.png" x="835" y="593" width="53" height="346"/>
+        <image class="letflick" id="lf-message" xlink:href="https://jadestaticbuilds.github.io/masks/message.png" href="https://jadestaticbuilds.github.io/masks/message.png" x="680" y="1715" width="315" height="75"/>
+    <ellipse class="signglow" cx="700" cy="816" rx="78" ry="205" fill="#ffc35c" filter="url(#p-beamblur)" style="animation-delay:-5.2s"/>
+    <circle class="beacon" cx="700" cy="545" r="7" fill="#ff6a5e" style="animation-duration:2.8s"/>
+    <circle class="sigring" cx="700" cy="545" r="16"/>
+    <circle class="sigring r2" cx="700" cy="545" r="16"/>
+    <g class="radiosign" filter="url(#p-winglow)" style="animation:neonflicker 8s linear infinite" aria-hidden="true">
+      <text x="700" y="680">R</text>
+      <text x="700" y="748">A</text>
+      <text x="700" y="816">D</text>
+      <text x="700" y="884">I</text>
+      <text x="700" y="952">O</text>
+    </g>
+    <g aria-hidden="true">
+      <rect x="726" y="590" width="58" height="25" rx="12.5" fill="#8fe0b3"/>
+      <text x="755" y="603" class="newtxt">NEW</text>
+    </g>
+  </g>
+  <g aria-hidden="true" transform="translate(655,1562)">
+    <ellipse cx="0" cy="-7" rx="5" ry="7" fill="#121826"/>
+    <circle cx="0" cy="-16" r="4" fill="#121826"/>
+    <polygon points="-4,-18 -2,-23 0,-18" fill="#121826"/>
+    <polygon points="4,-18 2,-23 0,-18" fill="#121826"/>
+    <g class="cattail"><line x1="-4" y1="-3" x2="-11" y2="-14" stroke="#121826" stroke-width="3" stroke-linecap="round"/></g>
+  </g>
+  <g aria-hidden="true">
+  </g>
+  <g class="hotspot" data-menu="games" tabindex="0" role="button" aria-label="Open games menu">
+    <rect x="130" y="680" width="170" height="440" rx="12"/>
+  </g>
+  <g class="hotspot" data-menu="tools" tabindex="0" role="button" aria-label="Open tools menu">
+    <rect x="800" y="1050" width="135" height="345" rx="12"/>
+  </g>
+  <g class="hotspot" data-drop="socials" tabindex="0" role="button" aria-label="Open socials">
+    <rect x="795" y="550" width="135" height="430" rx="12"/>
+  </g>
+  <g class="hotspot" data-drop="message" tabindex="0" role="button" aria-label="Leave a message">
+    <rect x="645" y="1680" width="385" height="145" rx="12"/>
+  </g>
+  <a class="radiohot" href="https://jadestaticbuilds.github.io/world-frequency/" aria-label="Open World Frequency radio">
+    <rect x="615" y="530" width="175" height="480" rx="12"/>
+  </a>
+</svg>
+<svg class="sky" id="skyL" viewBox="0 0 2048 1152" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Jade City skyline at night, wide view" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <filter id="l-winglow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <linearGradient id="l-beamgrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff6df" stop-opacity="0"/>
+      <stop offset="1" stop-color="#fff6df" stop-opacity=".8"/>
+    </linearGradient>
+    <filter id="l-beamblur" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="16"/>
+    </filter>
+  </defs>
+  <image class="skyimage" xlink:href="https://jadestaticbuilds.github.io/backdrop-wide.webp" href="https://jadestaticbuilds.github.io/backdrop-wide.webp" x="0" y="0" width="2048" height="1152"/>
+  <g transform="translate(1669,461)" aria-hidden="true">
+    <circle class="beamsrc" cx="0" cy="0" r="16" fill="#fff6df" filter="url(#l-beamblur)"/>
+    <g class="beamsweep l">
+      <polygon points="0,0 -55,-420 55,-420" fill="url(#l-beamgrad)" filter="url(#l-beamblur)" opacity=".5"/>
+    </g>
+  </g>
+  <g aria-hidden="true">
+    <ellipse class="signglow" cx="917" cy="548" rx="68" ry="150" fill="#ffc35c" filter="url(#l-beamblur)"/>
+    <circle class="beacon" cx="917" cy="348" r="6" fill="#ff6a5e" style="animation-duration:2.8s"/>
+    <circle class="sigring" cx="917" cy="348" r="14"/>
+    <circle class="sigring r2" cx="917" cy="348" r="14"/>
+    <g class="radiosign" filter="url(#l-winglow)" style="animation:neonflicker 9.5s linear infinite" aria-hidden="true">
+      <text x="917" y="432">R</text>
+      <text x="917" y="490">A</text>
+      <text x="917" y="548">D</text>
+      <text x="917" y="606">I</text>
+      <text x="917" y="664">O</text>
+    </g>
+    <g aria-hidden="true">
+      <rect x="943" y="368" width="54" height="23" rx="11.5" fill="#8fe0b3"/>
+      <text x="970" y="380" class="newtxt">NEW</text>
+    </g>
+  </g>
+  <g aria-hidden="true">
+    <circle class="win" cx="900" cy="600" r="7" fill="#ffe9b8" style="animation-duration:6.3s;animation-delay:-2.1s"/>
+    <circle class="win" cx="1050" cy="650" r="6" fill="#b8ffd9" style="animation-duration:7.8s;animation-delay:-4.4s"/>
+    <circle class="win" cx="1200" cy="550" r="6" fill="#ffe9b8" style="animation-duration:5.4s;animation-delay:-1.2s"/>
+    <circle class="win" cx="700" cy="700" r="7" fill="#b8ffd9" style="animation-duration:8.6s;animation-delay:-6.0s"/>
+    <circle class="win" cx="1300" cy="700" r="5" fill="#ffe9b8" style="animation-duration:6.9s;animation-delay:-3.3s"/>
+    <circle class="win" cx="500" cy="800" r="6" fill="#b8ffd9" style="animation-duration:7.2s;animation-delay:-5.1s"/>
+    <circle class="win" cx="1450" cy="750" r="5" fill="#ffe9b8" style="animation-duration:5.8s;animation-delay:-0.7s"/>
+    <circle class="win" cx="800" cy="850" r="6" fill="#b8ffd9" style="animation-duration:8.1s;animation-delay:-2.9s"/>
+    <circle class="win" cx="1100" cy="800" r="5" fill="#ffe9b8" style="animation-duration:6.6s;animation-delay:-4.0s"/>
+    <circle class="win" cx="600" cy="900" r="6" fill="#b8ffd9" style="animation-duration:7.5s;animation-delay:-1.6s"/>
+    <circle class="win" cx="1500" cy="850" r="5" fill="#ffe9b8" style="animation-duration:5.2s;animation-delay:-3.8s"/>
+    <circle class="win" cx="950" cy="900" r="6" fill="#b8ffd9" style="animation-duration:8.9s;animation-delay:-0.3s"/>
+  </g>
+  <g aria-hidden="true">
+  </g>
+  <g class="hotspot" data-menu="games" tabindex="0" role="button" aria-label="Open games menu">
+    <rect x="350" y="305" width="130" height="365" rx="12"/>
+  </g>
+  <g class="hotspot" data-menu="tools" tabindex="0" role="button" aria-label="Open tools menu">
+    <rect x="1400" y="580" width="135" height="450" rx="12"/>
+  </g>
+  <g class="hotspot" data-drop="socials" tabindex="0" role="button" aria-label="Open socials">
+    <rect x="1025" y="320" width="115" height="380" rx="12"/>
+  </g>
+  <g class="hotspot" data-drop="message" tabindex="0" role="button" aria-label="Leave a message">
+    <rect x="810" y="800" width="410" height="125" rx="12"/>
+  </g>
+  <a class="radiohot" href="https://jadestaticbuilds.github.io/world-frequency/" aria-label="Open World Frequency radio">
+    <rect x="843" y="340" width="160" height="370" rx="12"/>
+  </a>
+</svg>
+
+<div class="mist mist1" aria-hidden="true"></div>
+<div class="mist mist2" aria-hidden="true"></div>
+
+<canvas id="snowcv" aria-hidden="true"></canvas>
+<header class="topbar">
+  <button class="burger" id="burger" aria-expanded="false" aria-controls="appmenu" aria-label="App menu">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="brandmark">
+    <img src="https://jadestaticbuilds.github.io/avatar.jpg" alt="Jade Static Builds logo" draggable="false">
+    <b>JADE CITY</b>
+  </div>
+</header>
+<div id="wfbar" role="region" aria-label="World Frequency mini player">
+  <button id="wfPlay" type="button" aria-label="Play or pause radio">&#9654;</button>
+  <div class="wfmeta">
+    <div id="wfName">World Frequency</div>
+    <div id="wfTrack">Tap play: live radio from around the world</div>
+  </div>
+  <button id="wfPrev" type="button" aria-label="Previous station">&#8249;</button>
+  <button id="wfNext" type="button" aria-label="Next station">&#8250;</button>
+  <a id="wfOpen" href="https://jadestaticbuilds.github.io/world-frequency/">FULL APP</a>
+  <audio id="wfAudio" preload="none"></audio>
+</div>
+
+<nav class="panel" id="appmenu" hidden aria-label="All apps">
+  <div class="catgroup" data-cat="games">
+  <div class="cathead" id="cat-games">Games</div>
+  <a class="approw" href="https://jadestaticbuilds.github.io/glitch-snake/"><img src="https://jadestaticbuilds.github.io/logos/glitch-snake.webp" alt="" loading="lazy" decoding="async"><span class="nmtx"><span class="nm">Glitch Snake</span><small class="ds">Snake with wrap walls, frenzy mode and a death explosion</small></span></a>
+  <a class="approw" href="https://jadestaticbuilds.github.io/glitch-breakout/"><img src="https://jadestaticbuilds.github.io/logos/glitch-breakout.webp" alt="" loading="lazy" decoding="async"><span class="nmtx"><span class="nm">Glitch Breakout</span><small class="ds">Breakout where smashed bricks glitch the board</small></span></a>
+  <a class="approw" href="https://jadestaticbuilds.github.io/rider-dodger/"><img src="https://jadestaticbuilds.github.io/logos/rider-dodger.webp" alt="" loading="lazy" decoding="async"><span class="nmtx"><span class="nm">Rider Dodger</span><small class="ds">Dodge rain drops, jump puddles, outrun gusts</small></span></a>
+  <a class="approw" href="https://jadestaticbuilds.github.io/veil-skiff/"><img src="https://jadestaticbuilds.github.io/logos/veil-skiff.webp" alt="" loading="lazy" decoding="async"><span class="nmtx"><span class="nm">Veil Skiff<span class="new">NEW</span></span><small class="ds">Pilot a skiff through the White Veil galaxy</small></span></a>
+  <a class="approw" href="https://jadestaticbuilds.github.io/magnetician/"><img src="https://jadestaticbuilds.github.io/logos/magnetician.webp" alt="" loading="lazy" decoding="async"><span class="nmtx"><span class="nm">Magnetician<span class="new">NEW</span></span><small class="ds">Magnetism puzzler, guide the steel orb home</small></span></a>
+  <a class="approw" href="https://jadestaticbuilds.github.io/tincture/"><img src="https://jadestaticbuilds.github.io/logos/tincture.webp" alt="" loading="lazy" decoding="async"><span class="nmtx"><span class="nm">Tincture<span class="new">NEW</span></span><small class="ds">Alchemist's elixir-sorting ritual</small></span></a>
+  <a class="approw" href="https://jadestaticbuilds.github.io/six-deep/"><img src="https://jadestaticbuilds.github.io/logos/six-deep.webp" alt="" loading="lazy" decoding="async"><span class="nmtx"><span class="nm">Six Deep<span class="new">NEW</span></span><small class="ds">Candy ball-sort, tubes 6 deep, 10 colors</small></span></a>
+  <a class="approw" href="https://jadestaticbuilds.github.io/pantheon-clash/"><img src="https://jadestaticbuilds.github.io/logos/pantheon-clash.webp" alt="" loading="lazy" decoding="async"><span class="nmtx"><span class="nm">Pantheon Clash<span class="new">NEW</span></span><small class="ds">Gods of Egypt, Greece and Norse in a card clash</small></span></a>
+  <a class="approw" href="https://jadestaticbuilds.github.io/pyramid-builder/"><img src="https://jadestaticbuilds.github.io/logos/pyramid-builder.webp" alt="" loading="lazy" decoding="async"><span class="nmtx"><span class="nm">Pyramid Builder<span class="new">NEW</span></span><small class="ds">Rule a reign and raise a pyramid in 12 years</small></span></a>
+  <a class="approw" href="https://jadestaticbuilds.github.io/ironline/"><img src="https://jadestaticbuilds.github.io/logos/ironline.webp" alt="" loading="lazy" decoding="async"><span class="nmtx"><span class="nm">Ironline<span class="new">NEW</span></span><small class="ds">Dieselpunk rail switchyard puzzler</small></span></a>
+  <a class="approw" href="https://jadestaticbuilds.github.io/whiteout/"><img src="https://jadestaticbuilds.github.io/logos/whiteout.webp" alt="" loading="lazy" decoding="async"><span class="nmtx"><span class="nm">Whiteout<span class="new">NEW</span></span><small class="ds">Arctic survival, keep the fire lit</small></span></a>
+  <a class="approw" href="https://jadestaticbuilds.github.io/myth-choices/"><img src="https://jadestaticbuilds.github.io/logos/myth-choices.webp" alt="" loading="lazy" decoding="async"><span class="nmtx"><span class="nm">Myth Story Choices<span class="new">NEW</span></span><small class="ds">Play the real myths of Ra, Osiris and Isis</small></span></a>
+  <a class="approw" href="https://jadestaticbuilds.github.io/the-last-fare/"><img src="https://jadestaticbuilds.github.io/logos/the-last-fare.webp" alt="" loading="lazy" decoding="async"><span class="nmtx"><span class="nm">The Last Fare<span class="new">NEW</span></span><small class="ds">Noir cab-driving story with fifteen endings</small></span></a>
+  <a class="approw" href="https://jadestaticbuilds.github.io/salt-rush/"><img src="https://jadestaticbuilds.github.io/logos/salt-rush.webp" alt="" loading="lazy" decoding="async"><span class="nmtx"><span class="nm">Salt Rush<span class="new">NEW</span></span><small class="ds">Wind-powered land sailing on the salt flats</small></span></a>
+  <a class="approw" href="https://jadestaticbuilds.github.io/hadal-drift/"><img src="https://jadestaticbuilds.github.io/logos/hadal-drift.webp" alt="" loading="lazy" decoding="async"><span class="nmtx"><span class="nm">Hadal Drift<span class="new">NEW</span></span><small class="ds">Slow atmospheric deep-sea descent</small></span></a>
+  <a class="approw" href="https://jadestaticbuilds.github.io/dead-orbit/"><img src="https://jadestaticbuilds.github.io/logos/dead-orbit.webp" alt="" loading="lazy" decoding="async"><span class="nmtx"><span class="nm">Dead Orbit<span class="new">NEW</span></span><small class="ds">Space salvage trajectory game</small></span></a>
+  </div>
+  <div class="catgroup" data-cat="tools">
+  <div class="cathead" id="cat-tools">Tools</div>
+  <a class="approw" href="https://jadestaticbuilds.github.io/glitch-studio/"><img src="https://jadestaticbuilds.github.io/logos/glitch-studio.webp" alt="" loading="lazy" decoding="async"><span class="nmtx"><span class="nm">Glitch Studio<span class="new">NEW</span></span><small class="ds">Glitch photo editor in your browser</small></span></a>
+  <a class="approw" href="https://jadestaticbuilds.github.io/field-kit/"><img src="https://jadestaticbuilds.github.io/logos/field-kit.webp" alt="" loading="lazy" decoding="async"><span class="nmtx"><span class="nm">Field Kit</span><small class="ds">Offline checklists and notes for rides and hikes</small></span></a>
+  <a class="approw" href="https://jadestaticbuilds.github.io/prompt-playbook/"><img src="https://jadestaticbuilds.github.io/logos/prompt-playbook.webp" alt="" loading="lazy" decoding="async"><span class="nmtx"><span class="nm">Prompt Playbook</span><small class="ds">Turn ideas into paste-ready prompts</small></span></a>
+  <a class="approw" href="https://jadestaticbuilds.github.io/sound-lab/"><img src="https://jadestaticbuilds.github.io/logos/sound-lab.webp" alt="" loading="lazy" decoding="async"><span class="nmtx"><span class="nm">Sound Lab<span class="new">NEW</span></span><small class="ds">16-step beat maker with MIDI export</small></span></a>
+  <a class="approw" href="https://jadestaticbuilds.github.io/brief-builder/"><img src="https://jadestaticbuilds.github.io/logos/brief-builder.webp" alt="" loading="lazy" decoding="async"><span class="nmtx"><span class="nm">Brief Builder<span class="new">NEW</span></span><small class="ds">Turn rough ideas into delegation briefs</small></span></a>
+  <a class="approw" href="https://jadestaticbuilds.github.io/ride-check/"><img src="https://jadestaticbuilds.github.io/logos/ride-check.webp" alt="" loading="lazy" decoding="async"><span class="nmtx"><span class="nm">Ride Check</span><small class="ds">Motorcycle ride weather plus ride timer</small></span></a>
+  </div>
+</nav>
+
+<div class="panel" id="socialsdrop" hidden aria-label="Socials">
+  <div class="paneltitle">Find us</div>
+  <a class="socrow" href="https://www.threads.com/@jadestaticbuilds"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="18" text-anchor="middle" font-size="18" font-weight="700" fill="currentColor" font-family="system-ui, sans-serif">@</text></svg></span><span>Threads<small>@jadestaticbuilds</small></span></a>
+  <a class="socrow" href="https://soundcloud.com/jadestatic"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2.5 15.5v-2M5 16.5v-5M7.5 16.5V8" stroke-linecap="round"/><path d="M10 16.5h7.5a3 3 0 0 0 .5-5.96A4.5 4.5 0 0 0 10 9.2v7.3z"/></svg></span><span>SoundCloud<small>Jade Static</small></span></a>
+  <a class="socrow" href="https://youtube.com/@jadestatic"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="3.5"/><path d="M10.5 9.8v4.4L14.5 12z" fill="currentColor" stroke="none"/></svg></span><span>YouTube<small>@jadestatic</small></span></a>
+</div>
+
+<div class="panel" id="messagedrop" hidden aria-label="Leave a message">
+  <div class="paneltitle">Leave a message</div>
+  <form id="contactform" novalidate aria-label="Contact form">
+    <label class="flabel" for="cname">Name</label>
+    <input class="finput" id="cname" name="name" type="text" autocomplete="name" maxlength="60" required>
+    <label class="flabel" for="ctype">Type</label>
+    <select class="finput" id="ctype" name="type">
+      <option>Idea</option>
+      <option>Bug report</option>
+      <option>Hello</option>
+    </select>
+    <label class="flabel" for="cmsg">Message</label>
+    <textarea class="finput" id="cmsg" name="message" rows="3" maxlength="2000" required></textarea>
+    <input class="fhoney" type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <button class="fsend" id="csend" type="submit">Send</button>
+    <div class="fstatus" id="fstatus" role="status" aria-live="polite"></div>
+  </form>
+</div>
+
+<noscript><div style="position:fixed;top:70px;left:12px;right:12px;color:#f0f8f3;background:rgba(3,13,9,.9);padding:14px;border-radius:12px;z-index:30">This page needs JavaScript for the menu and signs.</div></noscript>
+
+<!-- GoatCounter removed in preview so test visits do not count -->
+<script>
+/* portrait vs landscape skyline */
+(function(){
+  var p=document.getElementById('skyP'),l=document.getElementById('skyL');
+  if(!p||!l)return;
+  function fit(){
+    var land=false;
+    try{land=window.matchMedia('(orientation: landscape)').matches;}catch(e){}
+    p.style.display=land?'none':'block';
+    l.style.display=land?'block':'none';
+  }
+  window.addEventListener('resize',fit);
+  window.addEventListener('orientationchange',fit);
+  fit();
+})();
+</script>
+<script>
+(function(){
+  var burger=document.getElementById('burger'),
+      menu=document.getElementById('appmenu'),
+      socials=document.getElementById('socialsdrop'),
+      message=document.getElementById('messagedrop'),
+      panels=[menu,socials,message];
+  function closeAll(){panels.forEach(function(p){p.hidden=true;});burger.setAttribute('aria-expanded','false');}
+  function toggle(panel){
+    var willOpen=panel.hidden;
+    closeAll();
+    if(willOpen){panel.hidden=false;if(panel===menu)burger.setAttribute('aria-expanded','true');}
+  }
+  burger.addEventListener('click',function(){if(menu.hidden){showMenu('all');}else{closeAll();}});
+  function showMenu(cat){
+    closeAll();
+    document.querySelectorAll('#appmenu .catgroup').forEach(function(g){
+      g.hidden=(cat!=='all'&&g.getAttribute('data-cat')!==cat);
+    });
+    menu.hidden=false;burger.setAttribute('aria-expanded','true');
+  }
+  function activate(el){
+    if(el.hasAttribute('data-menu')){
+      showMenu(el.getAttribute('data-menu'));
+    }else if(el.hasAttribute('data-drop')){
+      var id=el.getAttribute('data-drop');
+      toggle(document.getElementById(id==='socials'?'socialsdrop':'messagedrop'));
+    }
+  }
+  document.querySelectorAll('.hotspot').forEach(function(el){
+    el.addEventListener('click',function(){activate(el);});
+    el.addEventListener('keydown',function(e){
+      if(e.key==='Enter'||e.key===' '){e.preventDefault();activate(el);}
+    });
+  });
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeAll();});
+  /* no long-press Google/image menu on the header brandmark */
+  document.querySelector('.brandmark').addEventListener('contextmenu',function(e){e.preventDefault();});
+  document.addEventListener('pointerdown',function(e){
+    if(e.target.closest('.panel')||e.target.closest('.topbar')||e.target.closest('.hotspot'))return;
+    closeAll();
+  });
+})();
+/* contact form */
+(function(){
+  var form=document.getElementById('contactform'),
+      status=document.getElementById('fstatus'),
+      send=document.getElementById('csend');
+  if(!form)return;
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    var name=document.getElementById('cname').value.trim(),
+        type=document.getElementById('ctype').value,
+        msg=document.getElementById('cmsg').value.trim();
+    status.className='fstatus';
+    if(!name||!msg){status.textContent='Add your name and a message first.';status.classList.add('err');return;}
+    send.disabled=true;status.textContent='Sending...';
+    fetch('https://formspree.io/f/xwllrolw',{
+      method:'POST',
+      headers:{'Accept':'application/json','Content-Type':'application/json'},
+      body:JSON.stringify({name:name,type:type,message:msg,_subject:'Link page contact: '+type+' from '+name,_gotcha:''})
+    }).then(function(r){
+      if(r.ok){
+        status.textContent='Message sent. Thanks.';status.classList.add('ok');form.reset();
+      }else{
+        status.textContent='Something failed. Try again in a bit.';status.classList.add('err');
+      }
+    }).catch(function(){
+      status.textContent='Something failed. Try again in a bit.';status.classList.add('err');
+    }).finally(function(){send.disabled=false;});
+  });
+})();
+</script>
+<script>
+/* living-city preview: snow + letter flicker (portrait scene). Respects reduced motion. */
+(function(){
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  /* --- letter flicker: gaussian dips on a 48s cycle, matching the v17 mockup --- */
+  var EVENTS = {'lf-games':[3.2,9.1],'lf-tools':[6.5],'lf-socials':[1.8,10.4],'lf-message':[7.9]};
+  var els = {};
+  Object.keys(EVENTS).forEach(function(id){ els[id] = document.getElementById(id); });
+  function flick(t, tes){
+    var f = 1;
+    for(var i=0;i<tes.length;i++){
+      var dt = t - tes[i];
+      f -= 0.75*Math.exp(-Math.pow(dt/0.10,2)) + 0.40*Math.exp(-Math.pow((dt-0.18)/0.08,2));
+    }
+    return Math.max(f, 0.15);
+  }
+  /* --- snow: sparse distant flakes, one 48s crossing, gentle sway --- */
+  var cv = document.getElementById('snowcv'), ctx = cv.getContext('2d');
+  var W, H, flakes = [];
+  function size(){
+    W = cv.width = window.innerWidth; H = cv.height = window.innerHeight;
+    flakes = [];
+    var n = Math.round(W*H/9000);
+    for(var i=0;i<n;i++){
+      flakes.push({x:Math.random()*W, y:Math.random()*H,
+        r: i%3===0 ? 2 : 1.2, a: i%3===0 ? .5 : .32,
+        ph: Math.random()*6.283, sw: 10+Math.random()*8});
+    }
+  }
+  size(); window.addEventListener('resize', size);
+  var t0 = performance.now();
+  /* --- easter eggs: chimney steam + shooting star (portrait sky only) --- */
+  function skyMap(){
+    var s = Math.max(W/1184, H/2096);
+    return {s:s, ox:(W-1184*s)/2, oy:(H-2096*s)/2};
+  }
+  var STACKS = [[350,1000],[970,1295]];
+  function drawSteam(t, m){
+    for(var i=0;i<STACKS.length;i++){
+      for(var k=0;k<6;k++){
+        var age = (t + k*8) % 48, u = age/48;
+        var px = (STACKS[i][0] + 10*Math.sin(u*9+k*1.7)*u)*m.s + m.ox;
+        var py = (STACKS[i][1] - 110*u)*m.s + m.oy;
+        var r = (20+44*u)*m.s*0.5;
+        var a = 0.22*(1-u)*Math.min(1,u*10);
+        if(a <= 0.004 || r <= 0) continue;
+        var g = ctx.createRadialGradient(px,py,0,px,py,r);
+        g.addColorStop(0,'rgba(210,220,230,'+a.toFixed(3)+')');
+        g.addColorStop(1,'rgba(210,220,230,0)');
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(px,py,r,0,6.283); ctx.fill();
+      }
+    }
+  }
+  var METEOR = {t0:20, dur:1.6, x0:475, y0:60, x1:275, y1:140};
+  function drawMeteor(t, m){
+    var dt = t - METEOR.t0;
+    if(dt < 0 || dt > METEOR.dur) return;
+    var u = dt/METEOR.dur;
+    var hx = (METEOR.x0+(METEOR.x1-METEOR.x0)*u)*m.s + m.ox;
+    var hy = (METEOR.y0+(METEOR.y1-METEOR.y0)*u)*m.s + m.oy;
+    var env = Math.sin(Math.PI*Math.min(1,u*1.1));
+    var dx = METEOR.x1-METEOR.x0, dy = METEOR.y1-METEOR.y0;
+    var L = Math.hypot(dx,dy); dx/=L; dy/=L;
+    var tail = (140*u+16)*m.s*0.5;
+    ctx.lineCap = 'round';
+    for(var j=0;j<16;j++){
+      var d0 = tail*j/16, d1 = tail*(j+1)/16;
+      ctx.globalAlpha = 0.5*env*(1-j/16);
+      ctx.strokeStyle = 'rgba(225,238,255,1)';
+      ctx.lineWidth = Math.max(1, 3*(1-j/16)*m.s*0.5);
+      ctx.beginPath();
+      ctx.moveTo(hx-dx*d0, hy-dy*d0);
+      ctx.lineTo(hx-dx*d1, hy-dy*d1);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  }
+  /* --- touch neon: a jade light follows each pointer, leaving a fading trail --- */
+  var lights = {};
+  function touch(id, x, y){
+    var L = lights[id];
+    if(!L) L = lights[id] = {x:x, y:y, tx:x, ty:y, pts:[], last:performance.now()};
+    L.tx = x; L.ty = y; L.last = performance.now();
+  }
+  function eachTouch(e, fn){
+    for(var i=0;i<e.changedTouches.length;i++){ var t=e.changedTouches[i]; fn('t'+t.identifier, t.clientX, t.clientY); }
+  }
+  window.addEventListener('touchstart', function(e){ eachTouch(e, touch); }, {passive:true});
+  window.addEventListener('touchmove', function(e){ eachTouch(e, touch); }, {passive:true});
+  window.addEventListener('pointerdown', function(e){ if(e.pointerType!=='touch') touch('p'+e.pointerId, e.clientX, e.clientY); });
+  window.addEventListener('pointermove', function(e){ if(e.pointerType!=='touch') touch('p'+e.pointerId, e.clientX, e.clientY); });
+  function frame(now){
+    var t = ((now - t0)/1000) % 48;
+    for(var k in els){ if(els[k]) els[k].style.opacity = ((1-flick(t, EVENTS[k]))*0.9).toFixed(3); }
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle = '#eef4fa';
+    for(var i=0;i<flakes.length;i++){
+      var f = flakes[i];
+      var y = (f.y + H*t/48) % H;
+      var x = f.x + f.sw*Math.sin(6.283*t/48 + f.ph);
+      ctx.globalAlpha = f.a;
+      ctx.beginPath(); ctx.arc(x, y, f.r, 0, 6.283); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    if(W < H){ var sm = skyMap(); drawSteam(t, sm); drawMeteor(t, sm); }
+    /* neon touch lights + trails */
+    ctx.globalCompositeOperation = 'lighter';
+    for(var id in lights){
+      var L = lights[id];
+      var age = now - L.last;
+      if(age > 1400){ delete lights[id]; continue; }
+      L.x += (L.tx - L.x)*0.35; L.y += (L.ty - L.y)*0.35;
+      L.pts.unshift({x:L.x, y:L.y});
+      if(L.pts.length > 48) L.pts.pop();
+      var fade = 1 - age/1400;
+      for(var i=0;i<L.pts.length;i++){
+        var p = L.pts[i], k = (1 - i/L.pts.length)*fade;
+        if(k <= 0) continue;
+        var r = 16*k + 2;
+        var g = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,r);
+        g.addColorStop(0, 'rgba(150,255,210,'+(0.55*k).toFixed(3)+')');
+        g.addColorStop(0.4, 'rgba(46,230,168,'+(0.28*k).toFixed(3)+')');
+        g.addColorStop(1, 'rgba(46,230,168,0)');
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, 6.283); ctx.fill();
+      }
+      var cg = ctx.createRadialGradient(L.x,L.y,0,L.x,L.y,7);
+      cg.addColorStop(0, 'rgba(220,255,240,'+(0.9*fade).toFixed(3)+')');
+      cg.addColorStop(1, 'rgba(46,230,168,0)');
+      ctx.fillStyle = cg;
+      ctx.beginPath(); ctx.arc(L.x, L.y, 7, 0, 6.283); ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
+<script>
+/* World Frequency mini player: a 10-station shelf, plain audio, auto-retry once */
+(function(){
+  var ST = [
+    {name:"FIP", city:"Paris", urls:["https://icecast.radiofrance.fr/fip-midfi.mp3"]},
+    {name:"NTS Radio 1", city:"London", np:"nts1", urls:["https://stream-relay-geo.ntslive.net/stream"]},
+    {name:"SomaFM Groove Salad", city:"San Francisco", np:"soma:groovesalad", urls:["https://ice2.somafm.com/groovesalad-128-mp3","https://ice1.somafm.com/groovesalad-128-mp3"]},
+    {name:"KEXP", city:"Seattle", urls:["https://kexp.streamguys1.com/kexp160.aac"]},
+    {name:"Worldwide FM", city:"London", urls:["https://worldwide-fm.radiocult.fm/stream"]},
+    {name:"Capital Dance", city:"London", urls:["https://icecast.thisisdax.com/CapitalDanceMP3"]},
+    {name:"Ibiza Sonica", city:"Ibiza", urls:["https://ibizasonica.streaming-pro.com:8000/ibizasonica"]},
+    {name:"Radio FG", city:"Paris", urls:["https://radiofg.impek.com/fg"]},
+    {name:"WWOZ 90.7", city:"New Orleans", urls:["https://www.wwoz.org/listen/hi"]},
+    {name:"Cultura FM", city:"Sao Paulo", hls:1, urls:["https://player-culturafm.stream.uol.com.br/live/culturafm.m3u8"]}
+  ];
+  var audio = document.getElementById("wfAudio"),
+      playBtn = document.getElementById("wfPlay"),
+      nameEl = document.getElementById("wfName"),
+      trackEl = document.getElementById("wfTrack"),
+      idx = 0, seq = 0, urlIdx = 0, retries = 0, watchdog = null, hls = null,
+      npTimer = null, started = false, lastFail = 0;
+  function st(){ return ST[idx]; }
+  function setIcon(){ playBtn.innerHTML = (started && !audio.paused) ? "&#10073;&#10073;" : "&#9654;"; }
+  function fail(){
+    var now = Date.now(); if (now - lastFail < 350) return; lastFail = now;
+    clearTimeout(watchdog);
+    if (retries < 1){ retries++; trackEl.textContent = "Retrying " + st().name + "..."; setTimeout(load, 1100); return; }
+    urlIdx++; retries = 0;
+    if (urlIdx < st().urls.length){ load(); }
+    else { trackEl.textContent = "Could not reach " + st().name + ". Try the next station."; document.body.classList.remove("wf-playing"); setIcon(); }
+  }
+  function load(){
+    var s = st(), url = s.urls[urlIdx], my = seq;
+    clearTimeout(watchdog); watchdog = setTimeout(function(){ if (my === seq) fail(); }, 15000);
+    if (hls){ hls.destroy(); hls = null; }
+    if (s.hls && url.indexOf(".m3u8") >= 0){
+      if (window.Hls && Hls.isSupported()){
+        hls = new Hls(); hls.loadSource(url); hls.attachMedia(audio);
+        hls.on(Hls.Events.MANIFEST_PARSED, function(){ if (my === seq) audio.play().catch(function(){ if (my === seq) fail(); }); });
+        hls.on(Hls.Events.ERROR, function(e, d){ if (my === seq && d && d.fatal) fail(); });
+        return;
+      }
+      if (audio.canPlayType("application/vnd.apple.mpegurl")){ audio.src = url; audio.load(); }
+      else { fail(); return; }
+    } else { audio.src = url; audio.load(); }
+    audio.play().catch(function(){ if (my === seq) fail(); });
+  }
+  function play(i){
+    idx = (i + ST.length) % ST.length; seq++; urlIdx = 0; retries = 0; started = true;
+    stopNp();
+    nameEl.textContent = st().name + " \u00b7 " + st().city;
+    trackEl.textContent = "Tuning in...";
+    load();
+  }
+  function stopNp(){ if (npTimer) clearInterval(npTimer); npTimer = null; }
+  function npFetch(){
+    var s = st();
+    if (s.np === "nts1"){
+      fetch("https://www.nts.live/api/v2/live").then(function(r){ return r.json(); }).then(function(d){
+        var res = (d && d.results) || [], ch = null, i;
+        for (i = 0; i < res.length; i++) if (String(res[i].channel_name) === "1") ch = res[i];
+        if (ch && ch.now && ch.now.broadcast_title && st() === s) trackEl.textContent = "\u266a " + ch.now.broadcast_title;
+      }).catch(function(){});
+    } else if (s.np && s.np.indexOf("soma:") === 0){
+      var id = s.np.slice(5);
+      fetch("https://somafm.com/channels.json").then(function(r){ return r.json(); }).then(function(d){
+        var chs = (d && d.channels) || [], i;
+        for (i = 0; i < chs.length; i++) if (chs[i].id === id && chs[i].lastPlaying && st() === s) trackEl.textContent = "\u266a " + chs[i].lastPlaying;
+      }).catch(function(){});
+    }
+  }
+  function startNp(){ stopNp(); npFetch(); npTimer = setInterval(npFetch, 30000); }
+  playBtn.addEventListener("click", function(){
+    if (!started){ play(idx); return; }
+    if (audio.paused){ audio.play().catch(function(){}); } else { audio.pause(); }
+  });
+  document.getElementById("wfNext").addEventListener("click", function(){ play(idx + 1); });
+  document.getElementById("wfPrev").addEventListener("click", function(){ play(idx - 1); });
+  audio.addEventListener("playing", function(){
+    clearTimeout(watchdog); retries = 0;
+    document.body.classList.add("wf-playing"); setIcon();
+    trackEl.textContent = "Live \u00b7 " + st().city; startNp();
+  });
+  audio.addEventListener("pause", function(){ document.body.classList.remove("wf-playing"); setIcon(); stopNp(); });
+  audio.addEventListener("error", function(){ if (started && audio.src) fail(); });
+})();
+</script>
+<script>
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}
+</script>
+</body>
+</html>
+<!-- pages rebuild trigger -->
+<!-- re-trigger 2026-11-07 delist -->
